@@ -1,7 +1,7 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
-import { Animals } from './components/Animals';
+import { Animals } from './components/Animals/Animals';
 import { FeedButton } from './components/FeedButton';
 
 function App() {
