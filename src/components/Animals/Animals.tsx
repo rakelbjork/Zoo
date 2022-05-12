@@ -1,36 +1,55 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { animalList, getDateFromStorage, now } from "../../FeedButton/ToggleList";
 import { IAnimals } from "../../models/IAnimals";
-import { IAnimalResponse } from "../../models/IAnimalResponse";
-import "./Animals.css";
-import { debug } from "console";
+import "./../style/Animals.css";
 
-export function Animals() {
+export const Animals = () => {
     const [animals, setAnimals] = useState<IAnimals[]>([]);
-
+    let isAnimalHungry: boolean;
+    let isSameDay: boolean;
+    let timeSinceAnimalAte: number;
+    let lastFed: Date;
+  
     useEffect(() => {
-        if (animals.length !== 0) return;
-
-        axios
-        .get<IAnimalResponse>("https://animals.azurewebsites.net/api/animals")
-        .then((response) => { 
-            setAnimals(response.data.Search);
-            });
+      if (animals.length !== 0) return;
+      setAnimals(animalList);
     });
-
-    let animalsHtml = animals.map((animal) => {
-        return (
-        <div key={animal.id} className="animal-container">
-            <h3>{animal.name}</h3>
-            <div className="img-container">
-                <img src={animal.imageUrl} alt={animal.latinName} />
-            </div>
+  
+    return (
+      <>
+        <div className='container'>
+          {
+            animals.map((animal) => {
+              lastFed = getDateFromStorage(lastFed, animal);
+              timeSinceAnimalAte = now.valueOf() - lastFed.valueOf();
+              isSameDay = lastFed.getUTCDate() == now.getUTCDate();
+  
+              if (isAnimalHungry) {
+                return (
+                  <div key={animal.id} className='img-container'>
+                    <Link to={"/animal/" + animal.id}>
+                      <h3>{animal.name} (Hungrig! )</h3>
+                      <img src={animal.imageUrl} alt={animal.latinName} />
+                      <p>{animal.shortDescription}</p>
+                    </Link>
+                  </div>
+                )
+              } else {
+                return (
+                  <div key={animal.id} className='img-container'>
+                    <Link to={"/animal/" + animal.id}>
+                      <h3>{animal.name}</h3>
+                      <img src={animal.imageUrl} alt={animal.latinName} />
+                      <p>{animal.shortDescription}</p>
+                    </Link>
+                  </div>
+                )
+              }
+            })
+          }
         </div>
-        );
-    })
-
-    return <div className="Animals">
-        {animalsHtml}
-    </div>
-
-}
+      </>
+    )
+  }
